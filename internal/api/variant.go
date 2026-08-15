@@ -80,7 +80,13 @@ func CreateVariant(c *gin.Context) {
 
 func ListVariants(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if page < 1 {
+		page = 1
+	}
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "50"))
+	if pageSize < 1 {
+		pageSize = 50
+	}
 	search := c.Query("search")
 	verified := c.Query("verified")
 
@@ -98,7 +104,7 @@ func ListVariants(c *gin.Context) {
 
 	var variants []model.VariantChar
 	query.Order("frequency desc, variant_char asc").
-		Offset(page * pageSize).Limit(pageSize).Find(&variants)
+		Offset((page - 1) * pageSize).Limit(pageSize).Find(&variants)
 
 	c.JSON(http.StatusOK, gin.H{
 		"items":     variants,
