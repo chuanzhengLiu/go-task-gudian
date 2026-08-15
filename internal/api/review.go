@@ -128,7 +128,7 @@ func SubmitReview(c *gin.Context) {
 		Count(&approvedCount)
 
 	if req.Status == model.ReviewStatusApproved {
-		if int(approvedCount) >= project.ReviewRequired {
+		if int(approvedCount) > project.ReviewRequired {
 			page.Status = model.PageStatusCompleted
 		} else {
 			nextRound := model.ReviewRound{
