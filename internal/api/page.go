@@ -253,7 +253,10 @@ func LockPage(c *gin.Context) {
 	userID := c.GetUint64("user_id")
 
 	if page.LockBy != nil && *page.LockBy != userID {
-		if page.LockAt != nil && time.Since(*page.LockAt) > 5*time.Minute {
+		// Reject only while the existing lock is still active (acquired within
+		// the last 5 minutes). A lock older than that has expired and may be
+		// taken over by anyone.
+		if page.LockAt != nil && time.Since(*page.LockAt) < 5*time.Minute {
 			c.JSON(http.StatusConflict, gin.H{
 				"error":   "page is locked by another user",
 				"lock_by": page.LockBy,
