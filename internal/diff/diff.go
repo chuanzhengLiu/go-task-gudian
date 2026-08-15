@@ -235,7 +235,7 @@ func CompareVersions(textA, textB string, labels [2]string) *DiffResult {
 		}
 	}
 
-	total := len(runesA) + len(runesB)
+	total := max(len(runesA), len(runesB))
 	if total > 0 {
 		result.Similarity = float64(result.Equal) / float64(total)
 	}
