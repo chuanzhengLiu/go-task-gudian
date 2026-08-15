@@ -206,6 +206,10 @@ func CompareVersions(textA, textB string, labels [2]string) *DiffResult {
 			})
 		}
 		chunksWithEqual = append(chunksWithEqual, chunk)
+		// insert 不消耗 A 的字符，但 equal 段不能越过插入点重复统计。
+		if chunk.Position > posA {
+			posA = chunk.Position
+		}
 		if chunk.Operation == OpEqual || chunk.Operation == OpDelete || chunk.Operation == OpReplace {
 			posA = chunk.Position + chunk.Length
 		}
@@ -235,9 +239,13 @@ func CompareVersions(textA, textB string, labels [2]string) *DiffResult {
 		}
 	}
 
+	// Dice 系数：相等字符在两份文本中各出现一次，故分子为 2*Equal，
+	// 保证完全相同的文本相似度为 1。
 	total := len(runesA) + len(runesB)
 	if total > 0 {
-		result.Similarity = float64(result.Equal) / float64(total)
+		result.Similarity = float64(2*result.Equal) / float64(total)
+	} else {
+		result.Similarity = 1
 	}
 
 	return result
