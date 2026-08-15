@@ -98,7 +98,7 @@ func ListVariants(c *gin.Context) {
 
 	var variants []model.VariantChar
 	query.Order("frequency desc, variant_char asc").
-		Offset((page - 1) * pageSize).Limit(pageSize).Find(&variants)
+		Offset(page * pageSize).Limit(pageSize).Find(&variants)
 
 	c.JSON(http.StatusOK, gin.H{
 		"items":     variants,

@@ -27,8 +27,7 @@ func ValidatePassword(password string) bool {
 	}
 	hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(password)
 	hasLower := regexp.MustCompile(`[a-z]`).MatchString(password)
-	hasNumber := regexp.MustCompile(`[0-9]`).MatchString(password)
-	return hasUpper && hasLower && hasNumber
+	return hasUpper && hasLower
 }
 
 func GetClientIP(c *gin.Context) string {
