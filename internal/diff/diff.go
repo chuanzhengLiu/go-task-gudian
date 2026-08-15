@@ -235,9 +235,13 @@ func CompareVersions(textA, textB string, labels [2]string) *DiffResult {
 		}
 	}
 
+	// 相似度按 Sørensen–Dice 系数计算：匹配的字符数在两文本总字符数中所占的比例。
+	// 用 2*Equal 作为分子，使两文本完全相同时（Equal = len(A) = len(B)）相似度恰为 1.0，
+	// 而非旧的 Equal/(len(A)+len(B)) = 0.5。分母仍按两文本长度之和，可正确反映长度不等时
+	// 既有删除又有插入带来的差异。
 	total := len(runesA) + len(runesB)
 	if total > 0 {
-		result.Similarity = float64(result.Equal) / float64(total)
+		result.Similarity = 2.0 * float64(result.Equal) / float64(total)
 	}
 
 	return result
