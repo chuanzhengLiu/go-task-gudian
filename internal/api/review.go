@@ -128,7 +128,11 @@ func SubmitReview(c *gin.Context) {
 		Count(&approvedCount)
 
 	if req.Status == model.ReviewStatusApproved {
-		if int(approvedCount) > project.ReviewRequired {
+		// approvedCount already includes the approval saved above, so reaching
+		// the required count (>=) completes the page; the previous ">" check
+		// never satisfied, leaving the page stuck in reviewing and spawning an
+		// extra pending round each time.
+		if int(approvedCount) >= project.ReviewRequired {
 			page.Status = model.PageStatusCompleted
 		} else {
 			nextRound := model.ReviewRound{
