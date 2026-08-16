@@ -253,7 +253,7 @@ func LockPage(c *gin.Context) {
 	userID := c.GetUint64("user_id")
 
 	if page.LockBy != nil && *page.LockBy != userID {
-		if page.LockAt != nil && time.Since(*page.LockAt) > 5*time.Minute {
+		if lockHeldByOther(&page, userID, time.Now()) {
 			c.JSON(http.StatusConflict, gin.H{
 				"error":   "page is locked by another user",
 				"lock_by": page.LockBy,
@@ -274,6 +274,18 @@ func LockPage(c *gin.Context) {
 	model.DB.Save(&page)
 
 	c.JSON(http.StatusOK, page)
+}
+
+// lockHeldByOther 判断书页是否仍被其他用户持有有效锁。
+// 锁超过 5 分钟未动视为过期，任何人都可以接手。
+func lockHeldByOther(page *model.Page, userID uint64, now time.Time) bool {
+	if page.LockBy == nil || *page.LockBy == userID {
+		return false
+	}
+	if page.LockAt == nil {
+		return true
+	}
+	return now.Sub(*page.LockAt) < 5*time.Minute
 }
 
 func UnlockPage(c *gin.Context) {
